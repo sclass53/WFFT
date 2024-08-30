@@ -1,7 +1,7 @@
 body {
     background-size: 120% auto;
     background-repeat: no-repeat;
-    background-color: ghostwhite;
+    background-image: url("12345.jpg");
 }
 
 #login-box {
@@ -17,7 +17,7 @@ body {
 
 #login-box h1 {
     color: aliceblue;
-
+    font-family: Impact;
 }
 
 /*#login-box .form .item {*/
@@ -29,14 +29,14 @@ body {
 #login-box .form  input {
     color: white;
     width: 80px;
-    min-width: 80px;
+    min-width: 100px;
     max-width: 50%;
     font-size: 18px;
     text-align: center;
-    border: 1px solid black;
+    border: none;
     border-radius: 3px;
     padding: 5px 10px;
-    background: gainsboro;
+    background: transparent;
 }
 
 #login-box .form input[placeholder] {
@@ -47,12 +47,12 @@ body {
 #login-box button {
     border: 0;
     margin-top: 15px;
-    width: 125px;
-    height: 30px;
-    font-size: 20px;
+    width: 120px;
+    height: 50px;
+    font-size: 15px;
     font-weight: 700;
     color: white;
-    background-color: blue;
+    background-color: rgb(38, 130, 221);
     /*background-image: linear-gradient(to right, #00dbde 0%, #fc00ff 100%);*/
     border-radius: 15px;
 }

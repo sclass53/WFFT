@@ -25,13 +25,12 @@
 
     height: 30px;
 
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
 
     color: white;
 
-    border: solid 1px #a777e3;
-
+    border: none;
     line-height: 30px;
 
     margin-left: 10px;
@@ -42,17 +41,19 @@
     /*box-shadow: 2px 3px 5px #888888;*/
     /*background: linear-gradient(-45deg, rgba(87, 225, 181, 1) 0%, rgba(0, 63, 255, 1) 100%);*/
     /*box-shadow: 0 5px 20px rgba(0, 63, 255, .5);*/
-    background: linear-gradient(135deg, #6e8efb, #a777e3);
-    border-radius: 4px;
+    background: #07ca00;
+    border-radius: 15px;
     cursor: pointer;
 
 
 }
 .container input:hover{
-    border: solid 1px #eee;
     box-shadow: 0 5px 15px rgba(50, 50, 100, .3);
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+.container input:pressed{
+    box-shadow: -5px -5px -15px rgba(50, 50, 100, .3);
 }
 
 #footer {
