@@ -1,9 +1,12 @@
 body {
     background-size: 120% auto;
     background-repeat: no-repeat;
-    background-image: url("12345.jpg");
+    background-image: url("./excess/12345.jpg");
 }
-
+@font-face {
+    font-family: "Minecraft"; /* 定义字体名 */
+    src: url("./excess/Minecraft UTF-8.ttf"); /* 引入本体字体文件 */
+}
 #login-box {
     width: 30%;
     height: auto;
@@ -12,12 +15,14 @@ body {
     border-radius: 10px;
     text-align: center;
     background: #00000080;
-    padding: 20px 50px;
+    padding: 50px 80px 30px 80px;
 }
 
 #login-box h1 {
     color: aliceblue;
-    font-family: Impact;
+    font-family: 'Minecraft';
+    font-size: 40px;
+    margin-bottom: 35px;
 }
 
 /*#login-box .form .item {*/
@@ -27,7 +32,7 @@ body {
 /*}*/
 
 #login-box .form  input {
-    color: white;
+    color: white !important;
     width: 80px;
     min-width: 100px;
     max-width: 50%;
@@ -37,6 +42,8 @@ body {
     border-radius: 3px;
     padding: 5px 10px;
     background: transparent;
+    margin-top:10px;
+    margin-bottom:5px;
 }
 
 #login-box .form input[placeholder] {
@@ -46,15 +53,15 @@ body {
 
 #login-box button {
     border: 0;
-    margin-top: 15px;
-    width: 120px;
+    margin-top: 40px;
+    width: 160px;
     height: 50px;
     font-size: 15px;
     font-weight: 700;
     color: white;
     background-color: rgb(38, 130, 221);
     /*background-image: linear-gradient(to right, #00dbde 0%, #fc00ff 100%);*/
-    border-radius: 15px;
+    border-radius: 10px;
 }
 
 #message-box {
