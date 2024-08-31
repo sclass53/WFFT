@@ -2,6 +2,7 @@
 import base64
 import hashlib
 import json
+from colorama import Fore,Style
 
 from PyQt5.QtNetwork import QNetworkInterface
 
@@ -71,20 +72,20 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         if self.need_login and (self.path.startswith("/home") or self.path == "/"):  # 登录界面
             if self.judge_cookie():
                 if self.path == "/":
-                    print("已登录重定向")
+                    print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 已登录重定向")
                     self.send_response(302)
                     self.send_header("Location", "/home")
                     self.end_headers()
                     return
             else:  # no cookie
                 if self.path != "/":  # 重定向到登录页面
-                    print("未登录重定向00")
+                    print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 未登录重定向00")
                     self.send_response(302)
                     self.send_header("Location", "/")
                     self.end_headers()
                     return
         path = self.translate_path(self.path)
-        print("respond_get path:", self.path, path)
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+": respond_get path:", self.path, path)
         if path is None or not os.path.exists(path):
             self.send_error(404, "File not found")
             return
@@ -102,7 +103,7 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def respond_send_Slice_file(self, path):
         chunksize = 204800
-        print("get 大文件")
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+": Get 大文件")
         f = None
         ctype = self.guess_type(path)
         try:
@@ -117,7 +118,7 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 end = int(b) + 1
             else:
                 end = fs[6]
-            print("chunk", start, b, fs[6])
+            print(Fore.GREEN+"INFO"+Style.RESET_ALL+": chunk", start, b, fs[6])
         else:
             start = 0
             end = fs[6]
@@ -129,12 +130,12 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(end - start))
         self.send_header("Last-Modified", self.date_time_string(int(fs.st_mtime)))
         self.end_headers()
-        print(self.headers)
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+":",self.headers)
 
         self.send_a_file_chunk(f, (start, end))
 
     def respond_send_file(self, path):  # 发送小文件
-        print("get 小文件")
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+": Get 小文件")
         ctype = self.guess_type(path)
         try:
             f = open(path, 'rb')
@@ -151,7 +152,7 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_a_file_chunk(f)
 
     def send_a_file_chunk(self, f, chunk: tuple = None):
-        print("send chunk", chunk)
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+": send chunk", chunk)
         chunksize = 1048576
         try:
             if chunk is None:
@@ -179,11 +180,11 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(line)
 
     def do_HEAD(self):
-        print("do head")
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+": do head")
         self.do_GET()
 
     def do_POST(self):
-        print("do post", self.path)
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+": do post", self.path)
         # print(self.headers)
         post_data = self.rfile.read(int(self.headers['content-length'])).decode()
         # print(post_data)
@@ -195,7 +196,7 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         if requesttype == "login":
             psw = datadict["password"]
             if psw == QSettings('Bruhsoft', 'WFFT').value('transmitter/login_password', "1234"):
-                print("密码正确")
+                print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 密码正确")
                 cookie = {
                     "port": "{}".format(QSettings('Bruhsoft', 'WFFT').value("webtransmitterport", 8524, type=int)),
                     "password": "{}".format(
@@ -204,32 +205,32 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 encode = str.maketrans("so3wudphankvigbrq85t94lm71jf6cyzx2e", "i91x4bpv2cytol7aw5szhjr3gkd6mn8eufq")
                 # decode = str.maketrans("i91x4bpv2cytol7aw5szhjr3gkd6mn8eufq", "so3wudphankvigbrq85t94lm71jf6cyzx2e")
                 cookiestr = cookiestr.translate(encode)
-                print("encode", cookiestr)
+                print(Fore.GREEN+"INFO"+Style.RESET_ALL+": encode", cookiestr)
                 self.response_post(200, cookiestr)
             else:
-                print("密码不正确")
+                print(Fore.YELLOW+"WARN"+Style.RESET_ALL+": 密码不正确")
                 self.response_post(203, '{"密码不正确":0}')
             return
         elif requesttype == "chekcfile":
-            print(datadict)
+            print(Fore.GREEN+"INFO"+Style.RESET_ALL+":",datadict)
             fn = datadict["filename"]
             location = os.path.join(os.path.join(self.pathm, str(datadict["location"]).lstrip("/")),
                                     datadict["filename"])
             prlocation = location + ".jamdownloading"
             size = datadict["size"]
-            print(fn, location, size)
+            print(Fore.GREEN+"INFO"+Style.RESET_ALL+":",fn, location, size)
             if os.path.exists(location):
                 startdata = datadict["checkdata"]
                 startdata = base64.b64decode(startdata[startdata.find("base64,") + 7:])  # 提取出base64数据
-                print("存在同名文件", startdata[:50])
+                print(Fore.RED+"ERR"+Style.RESET_ALL+": 存在同名文件", startdata[:50])
                 with open(location, "rb") as f:
                     filedata = f.read(1024)
                     print(filedata[:50])
                 if startdata == filedata and size == os.path.getsize(location):
-                    print("文件开头/大小相同")
+                    print(Fore.YELLOW+"WARN"+Style.RESET_ALL+": 文件开头/大小相同")
                     self.response_post(200, '{"flag":"2"}')
                 else:
-                    print("文件不同,重命名")
+                    print(Fore.YELLOW+"WARN"+Style.RESET_ALL+": 文件不同,重命名")
                     n = 1
                     pl = os.path.splitext(fn)
                     newname = pl[0] + "-{}".format(n) + pl[1]
@@ -240,26 +241,26 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                         newpath = os.path.join(os.path.join(self.pathm, str(datadict["location"]).lstrip("/")), newname)
                     jslist = {"flag": "3", "newName": newname}
                     js = json.dumps(jslist)
-                    print("新命名为:", newpath, newname, js)
+                    print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 新命名为:", newpath, newname, js)
                     self.response_post(200, js)
             elif os.path.exists(prlocation):
-                print("存在未完成传输")
+                print(Fore.YELLOW+"WARN"+Style.RESET_ALL+": 存在未完成传输")
                 startdata = datadict["checkdata"]
                 startdata = base64.b64decode(startdata[startdata.find("base64,") + 7:])  # 提取出base64数据
                 with open(prlocation, "rb") as f:
                     filedata = f.read(1024)
                 if startdata == filedata:
-                    print("文件正确,继续传输", startdata[:10], filedata[:10])
+                    print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 文件正确,继续传输", startdata[:10], filedata[:10])
                     startid = os.path.getsize(prlocation)
                     self.response_post(200, '{"flag":"1","startindex":"' + str(startid) + '"}')
                 else:
-                    print("文件不同,删除重传")
+                    print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 文件不同,删除重传")
                     os.remove(prlocation)
                     self.response_post(200, '{"startindex":"0","flag":"0"}')
             else:
                 self.response_post(200, '{"startindex":"0","flag":"0"}')
         elif requesttype == "finishupload":
-            print("结束", datadict)
+            print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 结束", datadict)
             location = os.path.join(os.path.join(self.pathm, str(datadict["location"]).lstrip("/")),
                                     datadict["filename"])
             prlocation = location + ".jamdownloading"
@@ -267,13 +268,13 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             st = time.time()
             while truesize != os.path.getsize(prlocation) and (time.time() - st) < 2:
                 time.sleep(0.1)
-                print("wait writing")
-            print(truesize, os.path.getsize(prlocation))
+                print(Fore.GREEN+"INFO"+Style.RESET_ALL+": wait writing")
+            print(Fore.GREEN+"INFO"+Style.RESET_ALL+":",truesize, os.path.getsize(prlocation))
             if os.path.exists(prlocation) and os.path.getsize(prlocation) == datadict["totalsize"]:
                 os.rename(prlocation, location)
                 self.response_post(200)
             else:
-                print("文件校验出错")
+                print(Fore.RED+"ERR"+Style.RESET_ALL+": 文件校验出错")
                 if os.path.exists(prlocation):
                     os.remove(prlocation)
                 self.response_post(500)
@@ -305,9 +306,9 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 if os.path.exists(d):
                     os.mkdir(location)
                     self.response_post(200)
-                    print("创建文件夹成功")
+                    print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 创建文件夹成功")
                 else:
-                    print("创建文件夹失败,没有", d, urllib.parse.unquote(d))
+                    print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 创建文件夹失败,没有", d, urllib.parse.unquote(d))
                     raise Exception
             except:
                 self.response_post(400)
@@ -435,7 +436,7 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             if self.need_login:
                 return os.path.join(Work_Path, "html/index.html")
             else:
-                print("重定向")
+                print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 重定向")
                 self.send_response(302)
                 self.send_header("Location", self.path + "home/")
                 self.end_headers()
@@ -528,20 +529,20 @@ class WebFilesTransmitter_infolabel(QLabel):
 
     def open_url(self):
         QDesktopServices.openUrl(QUrl(self.url))
-        print("打开链接", self.url)
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 打开链接", self.url)
 
     def copy_qrcode(self):
         pix = self.qrcode_label.pixmap()
         clipboard = QApplication.clipboard()
         clipboard.setPixmap(pix)
-        print("二维码已复制到剪切板")
-        self.showm_signal.emit("二维码已复制到剪切板")
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 二维码已复制到剪切板")
+        self.showm_signal.emit(Fore.GREEN+"INFO"+Style.RESET_ALL+": 二维码已复制到剪切板")
 
     def copy_url(self):
         clipboard = QApplication.clipboard()
         clipboard.setText(self.url)
-        print("链接已复制到剪切板")
-        self.showm_signal.emit("链接已复制到剪切板")
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 链接已复制到剪切板")
+        self.showm_signal.emit(Fore.GREEN+"INFO"+Style.RESET_ALL+": 链接已复制到剪切板")
 
     def get_qrcode(self, url):
         qr = qrcode.QRCode(
@@ -553,8 +554,11 @@ class WebFilesTransmitter_infolabel(QLabel):
         qr.add_data(str(url))
         qr.make(fit=True)
         img = qr.make_image(fill_color="black", back_color="white")
-        pix = ImageQt.toqpixmap(img)
-        self.qrcode_label.setPixmap(pix.scaled(self.qrcode_label.width(), self.qrcode_label.height()))
+        try:
+            pix = ImageQt.toqpixmap(img)
+            self.qrcode_label.setPixmap(pix.scaled(self.qrcode_label.width(), self.qrcode_label.height()))
+        except:
+            pass
 
         # img.save()
 
@@ -567,7 +571,7 @@ class WebFilesTransmitter_infolabel(QLabel):
         self.get_qrcode(self.url)
         self.update()
         QApplication.processEvents()
-        print(self.url)
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+":",self.url)
 
     def paintEvent(self, e) -> None:
         super(WebFilesTransmitter_infolabel, self).paintEvent(e)
@@ -615,7 +619,7 @@ class serverloghandle(QThread):
                 # print("action", log["action"])
                 if ip not in self.iplist:
                     self.iplist.append(ip)
-                    ms = "{}正在访问你的共享文件\n{}".format(ip, actiontime)
+                    ms = Fore.GREEN+"INFO"+Style.RESET_ALL+": {}正在访问你的共享文件\n{}".format(ip, actiontime)
 
                 elif type(log["action"][0]) == str and log["action"][1] == "200":
                     if "get" in log["action"][0].lower():
@@ -625,15 +629,15 @@ class serverloghandle(QThread):
                             # print("正在访问:", getfile)
                             if getfile != olddir:
                                 olddir = getfile
-                                ms = "{}正在访问{}\nat{}".format(ip, getfile, actiontime)
+                                ms = Fore.GREEN+"INFO"+Style.RESET_ALL+": {}正在访问{}\nat{}".format(ip, getfile, actiontime)
                         elif not initems(["/favicon.ico", "jamcss", "jamjs", "jamhtmlpic"], getfile):
                             # print("下载了", getfile)
-                            ms = "{}下载了一个文件:\n{}\nat{}".format(ip, getfile, actiontime)
+                            ms = Fore.GREEN+"INFO"+Style.RESET_ALL+": {}下载了一个文件:\n{}\nat{}".format(ip, getfile, actiontime)
                     elif "post" in log["action"][0].lower():
-                        ms = "{}上传了一个文件到共享文件夹\nat{}".format(ip, actiontime)
+                        ms = Fore.GREEN+"INFO"+Style.RESET_ALL+": {}上传了一个文件到共享文件夹\nat{}".format(ip, actiontime)
                 if ms != "":
                     with open(os.path.join(QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation),
-                                           "jamWebTransmitter.log"), "a", encoding="utf-8") as log:
+                                           "WFFT.log"), "a", encoding="utf-8") as log:
                         log.write(actiontime + ms.replace("\n", "") + "\n")
                     self.showm_signal.emit(ms)
                 time.sleep(0.2)
@@ -653,7 +657,7 @@ class WebFilesTransmitter(QThread):
         super(WebFilesTransmitter, self).__init__()
         self.port = QSettings('Bruhsoft', 'WFFT').value("webtransmitterport", random.randint(6048, 65530), type=int)
         QSettings('Bruhsoft', 'WFFT').setValue("webtransmitterport", self.port)
-        print("端口:", self.port)
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 端口:", self.port)
         self.canupload = False
         self.need_login = True
         self.limitpath = []
@@ -664,20 +668,20 @@ class WebFilesTransmitter(QThread):
         self.sharing = False
 
     def run(self) -> None:
-        print("start server")
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+": Start Server -",time.time())
         self.http_handler = SimpleHTTPRequestHandler
         serverlog = serverloghandle()
         serverlog.showm_signal.connect(self.tranformshowmsignal)
         serverlog.start()
         if sys.platform == "darwin":
-            self.showm_signal.emit("macos下启动相对较慢,请稍等....")
+            self.showm_signal.emit(Fore.GREEN+"INFO"+Style.RESET_ALL+": macos下启动相对较慢,请稍等....")
         try:
             self.threadingServer = ThreadingServer(("", self.port), self.http_handler)
         except:
             print(sys.exc_info())
             self.resetport()
         if self.sharepath == "请先选择要共享的文件":
-            print("未选择要共享的文件!")
+            print(Fore.RED+"ERR"+Style.RESET_ALL+": 未选择要共享的文件!")
             self.showm_signal.emit("未选择要共享的文件!")
             return
         self.sharing = True
@@ -693,7 +697,7 @@ class WebFilesTransmitter(QThread):
 
         self.showm_signal.emit("已结束文件(夹)的共享")
         self.sharing = False
-        print("exit server")
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+": Exit Server")
 
     def tranformshowmsignal(self, s):
         self.showm_signal.emit(s)
@@ -713,12 +717,12 @@ class WebFilesTransmitter(QThread):
         self.devicedict = {k: v for k, v in sorted(availabledevices.items(), key=lambda item: item[1], reverse=True)}
         # if len(self.devicedict)==0:
         #     self.showm_signal.emit("未接入网络!")
-        print(self.devicedict)
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+":",self.devicedict)
         return self.devicedict
 
     def change_SHOWPATH(self, path):
         global SHOW_PATH
-        print("share path change to ", path)
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+": Share Path Change To ", path)
         SHOW_PATH = path
         self.sharepath = path
 
@@ -747,7 +751,7 @@ class WebFilesTransmitter(QThread):
                 self.http_handler.canupload = canupload
                 self.http_handler.need_login = need_login
             except:
-                print(sys.exc_info())
+                print(Fore.RED+"ERR"+Style.RESET_ALL+":",sys.exc_info())
 
             self.change_SHOWPATH(os.path.split(filelist[0])[0])
             if self.sharing:
@@ -837,11 +841,11 @@ class WebFilesTransmitterBox(QGroupBox):
             self.transmitter_web_start_btn.x() + self.transmitter_web_start_btn.width() + 200,
             self.transmitter_web_start_btn.y() + 10,
             1000, 500)
-        print(self.transmitter_web_info.isVisible(), self.transmitter_web_info.size(), 500, "vis")
+        print(Fore.GREEN+"INFO"+Style.RESET_ALL+":",self.transmitter_web_info.isVisible(), self.transmitter_web_info.size(), 500, "vis")
 
         def choicefiles():
             files, l = QFileDialog.getOpenFileNames(self, "选择要共享的文件", "", "all files(*.*);;")
-            print(files)
+            print(Fore.GREEN+"INFO"+Style.RESET_ALL+":",files)
             if len(files):
                 self.WebFilesTransmitter.show_some_files(files, self.transmitter_web_allowupload.isChecked(),
                                                          self.transmitter_web_need_login.isChecked())
@@ -853,7 +857,7 @@ class WebFilesTransmitterBox(QGroupBox):
             dir = QFileDialog.getExistingDirectory(self, "选择要共享的文件夹",
                                                    QSettings('Bruhsoft', 'WFFT').value('transmitter/sharepath', "",
                                                                                        str))
-            print(dir)
+            print(Fore.GREEN+"INFO"+Style.RESET_ALL+":",dir)
             if len(dir):
                 self.WebFilesTransmitter.show_a_dir(dir, self.transmitter_web_allowupload.isChecked(),
                                                     self.transmitter_web_need_login.isChecked())
@@ -898,10 +902,10 @@ class WebFilesTransmitterBox(QGroupBox):
     def changeshare(self):
         if self.transmitter_web_info.sharepath == "请先选择要共享的文件":
             self.showm_signal.emit("未选择要共享的路径/文件!")
-            print("未选择要共享的路径")
+            print(Fore.RED+"ERR"+Style.RESET_ALL+": 未选择要共享的路径")
             return
         if self.WebFilesTransmitter.sharing:
-            print("停止共享")
+            print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 停止共享")
             self.transmitter_web_start_btn.setStyleSheet("QPushButton{background-color:rgb(239,239,239);}")
             self.transmitter_web_start_btn.setText("开始共享")
             self.WebFilesTransmitter.stop_server()
@@ -909,7 +913,7 @@ class WebFilesTransmitterBox(QGroupBox):
             self.transmitter_web_start_btn.setStyleSheet("QPushButton{background-color:rgb(255,50,50);}")
             self.transmitter_web_start_btn.setText("结束共享")
             self.WebFilesTransmitter.start()
-            print("开始共享")
+            print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 开始共享")
 
     def resetport(self):
         sharing = self.WebFilesTransmitter.sharing
@@ -917,7 +921,7 @@ class WebFilesTransmitterBox(QGroupBox):
             try:
                 self.changeshare()
             except:
-                print(sys.exc_info())
+                print(Fore.BROWN+"FATAL"+Style.RESET_ALL+":",sys.exc_info())
         self.WebFilesTransmitter.port = random.randint(6048, 65530)
         QSettings('Bruhsoft', 'WFFT').setValue("webtransmitterport", self.WebFilesTransmitter.port)
         if sharing:
