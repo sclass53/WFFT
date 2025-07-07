@@ -43,7 +43,7 @@ Work_Path = SHOW_PATH = apppath = get_apppath()
 
 
 def sizeof_fmt(num):
-    for x in ['bytes', 'KB', 'MB', 'GB']:
+    for x in ['B', 'KB', 'MB', 'GB']:
         if num < 1024.0:
             return "%3.1f%s" % (num, x)
         num /= 1024.0
@@ -655,6 +655,7 @@ class WebFilesTransmitter(QThread):
 
     def __init__(self):
         super(WebFilesTransmitter, self).__init__()
+        QSettings('Bruhsoft', 'WFFT').setValue("webtransmitterport", 4000)
         self.port = QSettings('Bruhsoft', 'WFFT').value("webtransmitterport", 4000, type=int)
         QSettings('Bruhsoft', 'WFFT').setValue("webtransmitterport", self.port)
         print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 端口:", self.port)
