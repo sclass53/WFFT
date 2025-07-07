@@ -655,7 +655,7 @@ class WebFilesTransmitter(QThread):
 
     def __init__(self):
         super(WebFilesTransmitter, self).__init__()
-        self.port = QSettings('Bruhsoft', 'WFFT').value("webtransmitterport", random.randint(6048, 65530), type=int)
+        self.port = QSettings('Bruhsoft', 'WFFT').value("webtransmitterport", 4000, type=int)
         QSettings('Bruhsoft', 'WFFT').setValue("webtransmitterport", self.port)
         print(Fore.GREEN+"INFO"+Style.RESET_ALL+": 端口:", self.port)
         self.canupload = False
